@@ -96,6 +96,13 @@ public class MainActivity extends AppCompatActivity {
         // in this example, a LineChart is initialized from xml
         final LineChart chart = (LineChart) findViewById(R.id.chart);
         final List<Entry> entries = new ArrayList<Entry>();
+
+        LineDataSet dataSet = new LineDataSet(entries, "HR"); // add entries to dataset
+        dataSet.setColor(Color.RED);
+        dataSet.setValueTextColor(Color.BLACK); // styling, ...
+
+        LineData lineData = new LineData(dataSet);
+
         final long init_time = System.currentTimeMillis();
 
         hr_log.setOnClickListener(r ->{
@@ -165,14 +172,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void hrNotificationReceived(@NonNull String identifier, @NonNull PolarHrData data) {
                 Log.d(TAG, "HR value: " + data.hr + " rrsMs: " + data.rrsMs + " rr: " + data.rrs + " contact: " + data.contactStatus + "," + data.contactStatusSupported);
-                if(entries.size() > 50) entries.remove(0);
-                entries.add(new Entry((System.currentTimeMillis()-init_time)/1000, data.hr));
+                if(dataSet.getEntryCount() > 50) dataSet.removeEntry(0);
+                dataSet.addEntry(new Entry((System.currentTimeMillis()-init_time)/1000, data.hr));
 
-                LineDataSet dataSet = new LineDataSet(entries, "HR"); // add entries to dataset
-                dataSet.setColor(Color.RED);
-                dataSet.setValueTextColor(Color.BLACK); // styling, ...
+                lineData.removeDataSet(0);
+                lineData.addDataSet(dataSet);
 
-                LineData lineData = new LineData(dataSet);
                 chart.setData(lineData);
                 chart.invalidate(); // refresh
 
